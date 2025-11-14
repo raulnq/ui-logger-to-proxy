@@ -126,6 +126,7 @@ export const logger = new BatchLogger({
   batchSize: 10,
   flushInterval: 5000,
   maxRetries: 3,
+  minimumLogLevel: "Information",
   enrichment: {
     ReleaseVersion: "10.0.0",
   },

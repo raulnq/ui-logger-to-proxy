@@ -6,6 +6,15 @@ type LogLevel =
   | 'Error'
   | 'Fatal';
 
+const LogLevelValues: Record<LogLevel, number> = {
+  Verbose: 0,
+  Debug: 1,
+  Information: 2,
+  Warning: 3,
+  Error: 4,
+  Fatal: 5,
+};
+
 type LoggerConfig = {
   source: string;
   sourcetype: string;
@@ -15,6 +24,7 @@ type LoggerConfig = {
   batchSize: number;
   flushInterval: number;
   maxRetries: number;
+  minimumLogLevel?: LogLevel;
   enrichment?: Record<string, any>;
 };
 
@@ -47,6 +57,7 @@ class BatchLogger {
       batchSize: 10,
       flushInterval: 5000,
       maxRetries: 3,
+      minimumLogLevel: 'Information' as LogLevel,
     };
 
     this.config = {
@@ -69,6 +80,11 @@ class BatchLogger {
     if (document.hidden) {
       this.flush();
     }
+  }
+
+  private isEnabled(level: LogLevel): boolean {
+    const minimumLogLevel = this.config.minimumLogLevel || 'Information';
+    return LogLevelValues[level] >= LogLevelValues[minimumLogLevel];
   }
 
   addContext(properties: Record<string, any>): void {
@@ -120,6 +136,8 @@ class BatchLogger {
     properties?: Record<string, any>,
     error?: Error
   ): void {
+    if (!this.isEnabled(level)) return;
+
     const props = properties || {};
     const renderedMessage = this.renderMessage(messageTemplate, props);
     const mergedProperties = {
@@ -292,6 +310,7 @@ export const logger = new BatchLogger({
   batchSize: 10,
   flushInterval: 5000,
   maxRetries: 3,
+  minimumLogLevel: 'Information',
   enrichment: {
     ReleaseVersion: '10.0.0',
   },
