@@ -23,12 +23,12 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+  options.AddDefaultPolicy(policy =>
+  {
+    policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+  });
 });
 
 var app = builder.Build();
@@ -37,22 +37,22 @@ app.UseCors();
 
 var jsonOptions = new JsonSerializerOptions
 {
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+  DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 };
 
 app.MapPost("/collector", (LogEntry[] logEntries) =>
 {
-    if (logEntries != null && logEntries.Length > 0)
+  if (logEntries != null && logEntries.Length > 0)
+  {
+
+    foreach (var logEntry in logEntries)
     {
-
-        foreach (var logEntry in logEntries)
-        {
-            var individualJson = JsonSerializer.Serialize(logEntry, jsonOptions);
-            Log.Logger.ForwardToSplunk(individualJson);
-        }
+      var individualJson = JsonSerializer.Serialize(logEntry, jsonOptions);
+      Log.Logger.ForwardToSplunk(individualJson);
     }
+  }
 
-    return Results.Ok(new { timestamp = DateTime.UtcNow });
+  return Results.Ok(new { timestamp = DateTime.UtcNow });
 });
 
 app.Run();
@@ -61,18 +61,18 @@ Log.CloseAndFlush();
 
 public class LogEntry
 {
-    [JsonPropertyName("source")]
-    public string? Source { get; set; }
-    [JsonPropertyName("sourcetype")]
-    public string? SourceType { get; set; }
-    [JsonPropertyName("host")]
-    public string? Host { get; set; }
-    [JsonPropertyName("index")]
-    public string? Index { get; set; }
-    [JsonPropertyName("time")]
-    public long Time { get; set; }
-    [JsonPropertyName("event")]
-    public LogEvent? Event { get; set; }
+  [JsonPropertyName("source")]
+  public string? Source { get; set; }
+  [JsonPropertyName("sourcetype")]
+  public string? SourceType { get; set; }
+  [JsonPropertyName("host")]
+  public string? Host { get; set; }
+  [JsonPropertyName("index")]
+  public string? Index { get; set; }
+  [JsonPropertyName("time")]
+  public long Time { get; set; }
+  [JsonPropertyName("event")]
+  public LogEvent? Event { get; set; }
 
 };
 
@@ -84,6 +84,6 @@ public record LogEvent(
     Dictionary<string, JsonElement> Properties
 )
 {
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+  [JsonExtensionData]
+  public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }
